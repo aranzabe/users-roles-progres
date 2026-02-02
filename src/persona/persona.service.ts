@@ -1,5 +1,5 @@
 // src/personas/personas.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -41,14 +41,29 @@ export class PersonaService {
     });
   }
 
-  findOne(dni: string) {
-    return this.prisma.persona.findUnique({
+  async findOne(dni: string) {
+    const persona = await this.prisma.persona.findUnique({
       where: { dni },
       include: { rolesAsignados: { include: { rol: true } } },
     });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+    }
+
+    return persona;
   }
 
   async update(dni: string, updateDto: UpdatePersonaDto) {
+    const persona = await this.prisma.persona.findUnique({
+      where: { dni },
+      include: { rolesAsignados: { include: { rol: true } } },
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+    }
+    
     const { roles, ...personaData } = updateDto;
 
     // Verificar roles si se pasan
@@ -77,7 +92,16 @@ export class PersonaService {
     });
   }
 
-  remove(dni: string) {
+  async remove(dni: string) {
+    const persona = await this.prisma.persona.findUnique({
+      where: { dni },
+      include: { rolesAsignados: { include: { rol: true } } },
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+    }
+
     return this.prisma.persona.delete({ where: { dni } });
   }
 }
