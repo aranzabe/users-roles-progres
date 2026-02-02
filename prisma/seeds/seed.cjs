@@ -1,6 +1,6 @@
 
 //const { PrismaClient } = require('@prisma/client');
-const { PrismaClient } = require('../../generated/prisma');
+const { PrismaClient } = require('../../generated/prisma2');
 const { PrismaPg } = require('@prisma/adapter-pg');
 
 const { seedPersonas } = require('./persona.seed.cjs');
